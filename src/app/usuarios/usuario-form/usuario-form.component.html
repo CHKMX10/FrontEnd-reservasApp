@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ soloLectura ? 'Consultar' : esEdicion ? 'Editar' : 'Nuevo' }} usuario</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre de usuario</mat-label>
+      <input matInput formControlName="username">
+      <mat-error *ngIf="form.get('username')?.hasError('required')">
+        El nombre de usuario es requerido
+      </mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('minlength') || form.get('username')?.hasError('maxlength')">
+        El usuario debe tener entre 5 y 20 caracteres
+      </mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('pattern')">Solo letras, números, punto, guion y guion bajo</mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('servidor')">{{ form.get('username')?.getError('servidor') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width" *ngIf="!soloLectura">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" formControlName="password">
+      <mat-error *ngIf="form.get('password')?.hasError('required')">
+        La contraseña es requerida
+      </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('minlength') || form.get('password')?.hasError('maxlength')">
+        La contraseña debe tener entre 8 y 64 caracteres
+      </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('pattern')">Incluye al menos una letra y un número</mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('servidor')">{{ form.get('password')?.getError('servidor') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="rol">
+        <mat-option *ngFor="let rol of rolesCatalogo" [value]="rol.id">
+          {{ rol.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('rol')?.hasError('required')">
+        Debe seleccionar un rol
+      </mat-error>
+      <mat-error *ngIf="form.get('rol')?.hasError('servidor')">{{ form.get('rol')?.getError('servidor') }}</mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+    <button *ngIf="!soloLectura" mat-raised-button color="primary" type="submit" [disabled]="guardando">
+      {{ guardando ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

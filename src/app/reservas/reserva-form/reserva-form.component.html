@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>{{ soloLectura ? 'Consultar' : esEdicion ? 'Editar' : 'Nueva' }} reserva</h2>
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content>
+    <ng-container *ngIf="!esEdicion">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Huésped</mat-label>
+        <mat-select formControlName="idHuesped">
+          <mat-option *ngFor="let h of huespedes" [value]="h.id">{{ h.nombre }} {{ h.apellidos }}</mat-option>
+        </mat-select>
+        <mat-error>{{ form.get('idHuesped')?.getError('servidor') || 'Selecciona un huésped' }}</mat-error>
+      </mat-form-field>
+      <p *ngIf="cargandoHuespedes">Cargando huéspedes...</p>
+      <p *ngIf="!cargandoHuespedes && huespedes.length === 0">No hay huéspedes activos para seleccionar.</p>
+      <mat-form-field appearance="outline" class="full-width"><mat-label>Habitación</mat-label>
+        <mat-select formControlName="idHabitacion"><mat-option *ngFor="let h of habitaciones" [value]="h.idHabitacion">{{ h.numero }} — {{ h.tipo }} (capacidad {{ h.capacidad }})</mat-option></mat-select>
+        <mat-error>{{ form.get('idHabitacion')?.getError('servidor') || 'Selecciona una habitación disponible' }}</mat-error>
+      </mat-form-field>
+      <p *ngIf="cargandoHabitaciones">Cargando habitaciones...</p>
+      <p *ngIf="!cargandoHabitaciones && habitaciones.length === 0">No hay habitaciones disponibles para seleccionar.</p>
+    </ng-container>
+    <ng-container *ngIf="data.reserva as r">
+      <p>Huésped: {{ r.datosHuesped?.nombre || '—' }}</p>
+      <p>Habitación: {{ r.datosHabitacion?.numero || '—' }}</p>
+      <p>Estado: {{ r.estadoReserva }}</p>
+      <p>Precio por noche registrado: {{ r.precioNoche | currency:'MXN' }}</p>
+      <p>Total registrado: {{ r.precioTotal | currency:'MXN' }}</p>
+    </ng-container>
+    <mat-form-field appearance="outline" class="full-width"><mat-label>Fecha de entrada</mat-label>
+      <input matInput type="date" formControlName="fechaEntrada">
+      <mat-error>{{ form.get('fechaEntrada')?.getError('servidor') || 'Ingresa la fecha de entrada' }}</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width"><mat-label>Fecha de salida</mat-label>
+      <input matInput type="date" formControlName="fechaSalida">
+      <mat-error>{{ form.get('fechaSalida')?.getError('servidor') || (form.get('fechaSalida')?.hasError('rango') ? 'La salida debe ser posterior a la entrada' : 'Ingresa la fecha de salida') }}</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width"><mat-label>Número de personas</mat-label>
+      <input matInput type="number" formControlName="numeroPersonas" step="1">
+      <mat-error>{{ form.get('numeroPersonas')?.getError('servidor') || (form.get('numeroPersonas')?.hasError('capacidad') ? 'La cantidad supera la capacidad de la habitación' : 'Ingresa un entero positivo') }}</mat-error>
+    </mat-form-field>
+    <p *ngIf="habitacionSeleccionada">Capacidad: {{ habitacionSeleccionada.capacidad }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancelar()" [disabled]="guardando">{{ soloLectura ? 'Cerrar' : 'Cancelar' }}</button>
+    <button *ngIf="!soloLectura" mat-raised-button color="primary" type="submit" [disabled]="guardando || cargandoHabitaciones || cargandoHuespedes">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
+  </mat-dialog-actions>
+</form>
